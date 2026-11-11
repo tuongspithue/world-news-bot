@@ -143,3 +143,15 @@ for _ in range(12):
     print(s)
     if (s.get('status') or {}).get('video_status') in ('ready', 'error'): break
     time.sleep(10)
+
+# 6) liên kết nguồn tin để ở BÌNH LUẬN đầu tiên (không để trong nội dung bài)
+link = str(P.get('link') or '').strip()
+if link and kind != 'story':
+    try:
+        pid = (f.json() or {}).get('post_id') or vid
+        for target in dict.fromkeys([pid, vid]):
+            cm = requests.post(f'{GV}/{target}/comments', data={'message': '🔗 Nguồn tin / Source: ' + link, 'access_token': TOKEN}, timeout=60)
+            print('Bình luận', target, cm.status_code, cm.text[:200])
+            if cm.ok: break
+    except Exception as e:
+        print('Bình luận lỗi:', e)
