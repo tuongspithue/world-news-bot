@@ -1,0 +1,22 @@
+name: make-reel
+on:
+  repository_dispatch:
+    types: [make_reel]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: pip, cache-dependency-path: reel/requirements.txt }
+      - run: sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+      - run: pip install -r reel/requirements.txt
+      - name: Build and publish
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          GOOGLE_OAUTH_TOKEN: ${{ secrets.GOOGLE_OAUTH_TOKEN }}
+          FB_PAGE_TOKEN_WORLD: ${{ secrets.FB_PAGE_TOKEN_WORLD }}
+        run: python reel/reel.py
